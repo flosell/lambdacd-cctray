@@ -5,11 +5,19 @@
             [clj-time.core :as t]
             [lambdacd-cctray.core :refer :all]))
 
+(defn some-name [& _])
+
+(def pipeline-def
+  `(
+     some-name))
+
+(def some-state { 0 { [1] {:status :success}}})
+
 (deftest cc-xmltray-for-test
   (testing "That it produces a valid cctray-xml"
-    (let [xmlstring (cctray-xml-for nil nil)
+    (let [xmlstring (cctray-xml-for pipeline-def some-state)
           xmlstream (io/input-stream (.getBytes xmlstring))]
-      (is (= [{:name "Some Name"
+      (is (= [{:name "some-name"
               :activity :sleeping
               :last-build-status :exception
               :last-build-label "8"
