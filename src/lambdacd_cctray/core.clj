@@ -29,7 +29,7 @@
     (xml/element :Project {:name (:name step-info)
                            :activity (:activity state-for-step)
                            :lastBuildStatus "Exception"
-                           :lastBuildLabel "8"
+                           :lastBuildLabel (str (:build-number state-for-step))
                            :lastBuildTime "2005-09-28T10:30:34+01:00"
                            :webUrl "some-host/some-path/"} [])))
 
@@ -41,3 +41,9 @@
 (defn cctray-xml-for [pipeline-def pipeline-state]
   (xml/emit-str
     (xml/element :Projects {} (projects-for pipeline-def pipeline-state))))
+
+(defn cctray-handler-for [pipeline-def pipeline-state]
+  {:status  200
+   :headers {"Content-Type" "application/xml"}
+   :body    (cctray-xml-for pipeline-def pipeline-state)})
+

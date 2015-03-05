@@ -11,7 +11,7 @@
   `(
      some-name))
 
-(def some-state { 0 { [1] {:status :success}}})
+(def some-state { 8 { [1] {:status :success}}})
 
 (deftest cc-xmltray-for-test
   (testing "That it produces a valid cctray-xml"
@@ -20,7 +20,7 @@
       (is (= [{:name "some-name"
               :activity :sleeping
               :last-build-status :exception
-              :last-build-label "8"
+              :last-build-label "8" ;; maybe this should be another build?
               :last-build-time (t/date-time 2005 9 28 9 30 34 0)
               :web-url "some-host/some-path/"
               :messages          []
