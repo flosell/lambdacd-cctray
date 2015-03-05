@@ -33,9 +33,12 @@
                            :lastBuildTime "2005-09-28T10:30:34+01:00"
                            :webUrl "some-host/some-path/"} [])))
 
+(defn- flatten-pipeline [pipeline-representation]
+  (let [children-reps (flatten (map #(flatten-pipeline (:children %)) pipeline-representation))]
+    (concat pipeline-representation children-reps)))
 
 (defn- projects-for [def state]
-  (let [pipeline-representation (lp/display-representation def)]
+  (let [pipeline-representation (flatten-pipeline (lp/display-representation def))]
     (map (partial project-for state) pipeline-representation)))
 
 (defn cctray-xml-for [pipeline-def pipeline-state]
