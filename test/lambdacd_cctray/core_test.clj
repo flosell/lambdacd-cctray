@@ -16,7 +16,8 @@
        some-other-name)))
 
 (def some-state {8 { [1] {:status :success}}
-                 3 { [1 2] {:status :running}}})
+                 3 { [1 2] {:status :running}}
+                 2 { [1 2] {:status :failure}}})
 
 (deftest cc-xmltray-for-test
   (testing "That it produces a valid cctray-xml"
@@ -25,19 +26,19 @@
           projects (parser/get-projects xmlstream)]
       (is (= {:name "some-name"
               :activity :sleeping
-              :last-build-status :exception
-              :last-build-label "8" ;; maybe this should be another build?
+              :last-build-status :success
+              :last-build-label "8" 
               :last-build-time (t/date-time 2005 9 28 9 30 34 0)
               :web-url "some-host/some-path/"
               :messages          []
               :next-build-time   nil
-              :prognosis         :unknown} (first projects)))
+              :prognosis         :healthy} (first projects)))
       (is (= {:name "some-other-name"
                :activity :building
-               :last-build-status :exception
-               :last-build-label "3" ;; maybe this should be another build?
+               :last-build-status :failure
+               :last-build-label "3"
                :last-build-time (t/date-time 2005 9 28 9 30 34 0)
                :web-url "some-host/some-path/"
                :messages          []
                :next-build-time   nil
-               :prognosis         :unknown} (nth projects 2))))))
+               :prognosis         :sick-building} (nth projects 2))))))
