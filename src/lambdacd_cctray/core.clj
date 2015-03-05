@@ -42,8 +42,8 @@
   (xml/emit-str
     (xml/element :Projects {} (projects-for pipeline-def pipeline-state))))
 
-(defn cctray-handler-for [pipeline-def pipeline-state]
+(defn cctray-handler-for [pipeline-def state-atom]
   {:status  200
    :headers {"Content-Type" "application/xml"}
-   :body    (cctray-xml-for pipeline-def pipeline-state)})
+   :body    (cctray-xml-for pipeline-def @state-atom)})
 
