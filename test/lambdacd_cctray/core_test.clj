@@ -27,7 +27,7 @@
       (is (= {:name "some-name"
               :activity :sleeping
               :last-build-status :success
-              :last-build-label "8" 
+              :last-build-label "8"
               :last-build-time (t/date-time 2005 9 28 9 30 34 0)
               :web-url "some-host/some-path/"
               :messages          []

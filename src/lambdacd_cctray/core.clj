@@ -2,10 +2,6 @@
   (:require [clojure.data.xml :as xml]
             [lambdacd.presentation :as lp]))
 
-(defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
 
 (defn- has-step-id [step-id [k v]]
   (get v step-id)
@@ -15,7 +11,6 @@
   (let [build-number k
         status (get v step-id)
         activity (if (= (:status status) :running) "Building" "Sleeping")]
-    (println "state for" status)
     {:build-number build-number
      :activity activity
      :result status}))
@@ -23,7 +18,6 @@
 (defn- states-for [step-id state]
   (let [builds-with-step-id (filter #(has-step-id step-id %) (seq state))
         by-most-recent (reverse (sort-by first builds-with-step-id))]
-    (println "builds with step id " step-id builds-with-step-id)
     (map #(state-for step-id %) by-most-recent)))
 
 (defn- last-build-status-for [states-for-step]
