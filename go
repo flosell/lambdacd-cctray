@@ -14,12 +14,17 @@ push() {
   testall && git push
 }
 
+release() {
+  lein release "$1"
+}
 if [ "$1" == "testall" ]; then
     testall
 elif [ "$1" == "test" ]; then
     testunit
 elif [ "$1" == "push" ]; then
     push
+elif [ "$1" == "release" ]; then
+    release "$2"
 else
     echo "usage: $0 <goal>
 
