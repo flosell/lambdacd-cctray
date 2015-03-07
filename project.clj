@@ -3,7 +3,8 @@
   :url "http://github.com/flosell/lambdacd-cctray"
   :license {:name "Apache License, version 2.0"
             :url "http://www.apache.org/licenses/LICENSE-2.0.html"}
-  :deploy-repositories [["clojars" {:creds :gpg}]]
+  :deploy-repositories [["clojars" {:creds :gpg}]
+                        ["releases" :clojars]]
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [lambdacd "0.1.0-alpha12"]
                  [clj-time "0.9.0"]
