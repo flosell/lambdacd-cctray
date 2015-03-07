@@ -3,7 +3,7 @@
             [clojure.java.io :as io]
             [clj-cctray.core :as parser]
             [clj-time.core :as t]
-            [lambdacd.control-flow :as control-flow]
+            [lambdacd.steps.control-flow :as control-flow]
             [lambdacd-cctray.core :refer :all]))
 
 (defn some-name [& _])

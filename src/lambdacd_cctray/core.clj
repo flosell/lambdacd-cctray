@@ -1,7 +1,6 @@
 (ns lambdacd-cctray.core
   (:require [clojure.data.xml :as xml]
-            [lambdacd.presentation :as lp]))
-
+            [lambdacd.presentation.pipeline-structure :as lp]))
 
 (defn- has-step-id [step-id [k v]]
   (get v step-id)
