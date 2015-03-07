@@ -1,6 +1,6 @@
 (defproject lambdacd-cctray "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
+  :description "cctray support for lambdacd"
+  :url "http://github.com/flosell/lambdacd-cctray"
   :license {:name "Apache License, version 2.0"
             :url "http://www.apache.org/licenses/LICENSE-2.0.html"}
   :deploy-repositories [["clojars" {:creds :gpg}]]
