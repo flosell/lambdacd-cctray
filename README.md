@@ -11,9 +11,17 @@ Work in progress
 ## Usage
 
 ```clojure
+; ...
+(:require ; ...
+          [lambdacd-cctray.core :as cctray])
+
+; ...
+
 (let [pipeline (lambdacd/mk-pipeline pipeline/pipeline-def {})
       cctray-pipeline-handler (cctray/cctray-handler-for pipeline/pipeline-def (:state pipeline))
+
   ; ...
+
   (GET "/cctray/pipeline.xml" [] cctray-pipeline-handler)
 ```
 

@@ -1,6 +1,6 @@
 (ns lambdacd-cctray.sample-pipeline
   (:use [compojure.core]
-         [lambdacd.steps.control-flow])
+        [lambdacd.steps.control-flow])
   (:require [lambdacd.steps.shell :as shell]
             [lambdacd.steps.manualtrigger :as manualtrigger]
             [lambdacd.core :as lambdacd]
