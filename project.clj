@@ -9,4 +9,6 @@
                  [lambdacd "0.1.0-alpha13"]
                  [clj-time "0.9.0"]
                  [org.clojure/data.xml "0.0.8"]]
-  :profiles {:dev {:dependencies [[clj-cctray "0.8.0"]]}})
+  :profiles {:dev {:dependencies [[clj-cctray "0.8.0"]
+                                  [ring-server "0.3.1"]]
+                   :main lambdacd-cctray.sample-pipeline}})

@@ -32,31 +32,32 @@
       :failure "Failure"
       "Unknown")))
 
-(defn- project-for [state step-info]
+(defn- project-for [state base-url step-info]
   (let [states-for-step (states-for (:step-id step-info) state)
-        state-for-step (first states-for-step)]
+        state-for-step (first states-for-step)
+        last-build-number (:build-number state-for-step)]
     (xml/element :Project {:name (:name step-info)
                            :activity (:activity state-for-step)
                            :lastBuildStatus (last-build-status-for states-for-step)
-                           :lastBuildLabel (str (:build-number state-for-step))
+                           :lastBuildLabel (str last-build-number)
                            :lastBuildTime "2005-09-28T10:30:34+01:00"
-                           :webUrl "some-host/some-path/"} [])))
+                           :webUrl (str base-url "/old/?build=" last-build-number)} [])))
 
 (defn- flatten-pipeline [pipeline-representation]
   (let [children-reps (flatten (map #(flatten-pipeline (:children %)) pipeline-representation))]
     (concat pipeline-representation children-reps)))
 
-(defn- projects-for [def state]
+(defn- projects-for [def state base-url]
   (let [pipeline-representation (flatten-pipeline (lp/display-representation def))]
-    (map (partial project-for state) pipeline-representation)))
+    (map (partial project-for state base-url) pipeline-representation)))
 
-(defn cctray-xml-for [pipeline-def pipeline-state]
+(defn cctray-xml-for [pipeline-def pipeline-state base-url]
   (xml/emit-str
-    (xml/element :Projects {} (projects-for pipeline-def pipeline-state))))
+    (xml/element :Projects {} (projects-for pipeline-def pipeline-state base-url))))
 
-(defn cctray-handler-for [pipeline-def state-atom]
+(defn cctray-handler-for [pipeline-def state-atom base-url]
   (fn [& _]
     {:status  200
      :headers {"Content-Type" "application/xml"}
-     :body    (cctray-xml-for pipeline-def @state-atom)}))
+     :body    (cctray-xml-for pipeline-def @state-atom base-url)}))
 

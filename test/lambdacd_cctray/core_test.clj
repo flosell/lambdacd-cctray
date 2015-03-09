@@ -21,7 +21,7 @@
 
 (deftest cc-xmltray-for-test
   (testing "That it produces a valid cctray-xml"
-    (let [xmlstring (cctray-xml-for pipeline-def some-state)
+    (let [xmlstring (cctray-xml-for pipeline-def some-state  "some/base/url")
           xmlstream (io/input-stream (.getBytes xmlstring))
           projects (parser/get-projects xmlstream)]
       (is (= {:name "some-name"
@@ -29,7 +29,7 @@
               :last-build-status :success
               :last-build-label "8"
               :last-build-time (t/date-time 2005 9 28 9 30 34 0)
-              :web-url "some-host/some-path/"
+              :web-url "some/base/url/old/?build=8"
               :messages          []
               :next-build-time   nil
               :prognosis         :healthy} (first projects)))
@@ -38,7 +38,7 @@
                :last-build-status :failure
                :last-build-label "3"
                :last-build-time (t/date-time 2005 9 28 9 30 34 0)
-               :web-url "some-host/some-path/"
+               :web-url "some/base/url/old/?build=3"
                :messages          []
                :next-build-time   nil
                :prognosis         :sick-building} (nth projects 2))))))
