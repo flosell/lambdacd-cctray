@@ -10,8 +10,6 @@ Work in progress
 [![Clojars Project](http://clojars.org/lambdacd-cctray/latest-version.svg)](http://clojars.org/lambdacd-cctray)
 ## Usage
 
-* Import library
-*
 ```clojure
 (let [pipeline (lambdacd/mk-pipeline pipeline/pipeline-def {})
       cctray-pipeline-handler (cctray/cctray-handler-for pipeline/pipeline-def (:state pipeline))
@@ -21,7 +19,7 @@ Work in progress
 
 ## Development
 
-`./go`
+Call `./go`
 
 ## License
 
