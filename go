@@ -1,4 +1,5 @@
 #!/bin/bash 
+set -e
 
 test() {
   lein test
@@ -9,7 +10,7 @@ testunit() {
 }
 
 push() {
-  testall && git push
+  test && git push
 }
 
 release() {
