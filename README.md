@@ -21,6 +21,8 @@ Work in progress
   (GET "/cctray/pipeline.xml" [] cctray-pipeline-handler)
 ```
 
+For a full example, see [test/lambdacd_cctray/sample_pipeline.clj](test/lambdacd_cctray/sample_pipeline.clj)
+
 ## Development
 
 Call `./go`
