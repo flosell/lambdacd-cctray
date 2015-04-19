@@ -1,6 +1,7 @@
 (ns lambdacd-cctray.core
   (:require [clojure.data.xml :as xml]
             [lambdacd.presentation.pipeline-structure :as lp]
+            [clojure.string :as s]
             [clj-time.format :as f ]))
 
 (defn- has-step-id [step-id [k v]]
@@ -39,7 +40,9 @@
     formatted))
 
 (defn- project-for [state base-url step-info]
-  (let [states-for-step (states-for (:step-id step-info) state)
+  (let [step-id (:step-id step-info)
+        formatted-step-id (s/join "-" step-id)
+        states-for-step (states-for step-id state)
         state-for-step (first states-for-step)
         last-build-number (:build-number state-for-step)]
     (xml/element :Project {:name (:name step-info)
@@ -47,7 +50,7 @@
                            :lastBuildStatus (last-build-status-for states-for-step)
                            :lastBuildLabel (str last-build-number)
                            :lastBuildTime (last-build-time-for state-for-step)
-                           :webUrl (str base-url "/old/?build=" last-build-number)} [])))
+                           :webUrl (str base-url "/#/builds/" last-build-number "/" formatted-step-id)} [])))
 
 (defn- flatten-pipeline [pipeline-representation]
   (let [children-reps (flatten (map #(flatten-pipeline (:children %)) pipeline-representation))]

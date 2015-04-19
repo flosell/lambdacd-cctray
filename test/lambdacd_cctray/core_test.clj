@@ -32,7 +32,7 @@
               :last-build-status :success
               :last-build-label "8"
               :last-build-time (t/date-time 2015 1 2 3 40 0)
-              :web-url "some/base/url/old/?build=8"
+              :web-url "some/base/url/#/builds/8/1"
               :messages          []
               :next-build-time   nil
               :prognosis         :healthy} (first projects)))
@@ -41,7 +41,7 @@
                :last-build-status :failure
                :last-build-label "3"
                :last-build-time (t/date-time 2015 1 2 3 40 1)
-               :web-url "some/base/url/old/?build=3"
+               :web-url "some/base/url/#/builds/3/1-2"
                :messages          []
                :next-build-time   nil
                :prognosis         :sick-building} (nth projects 2))))))
