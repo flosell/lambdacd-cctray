@@ -6,6 +6,8 @@
             [lambdacd.core :as lambdacd]
             [ring.server.standalone :as ring-server]
             [lambdacd.util :as util]
+            [lambdacd.ui.ui-server :as ui]
+            [lambdacd.runners :as runners]
             [lambdacd-cctray.core :as cctray]
             [ring.util.response :as resp]))
 
@@ -50,9 +52,9 @@
 (defn -main [& args]
   (let [home-dir (if (not (empty? args)) (first args) (util/create-temp-dir))
         config { :home-dir home-dir }
-        p (lambdacd/mk-pipeline pipeline config)
-        cctray-pipeline-handler (cctray/cctray-handler-for pipeline (:state p) "http://localhost:8080/pipeline")]
-    ((:init p))
-    (ring-server/serve (mk-routes (:ring-handler p) cctray-pipeline-handler)
+        pipeline (lambdacd/assemble-pipeline pipeline config)
+        cctray-pipeline-handler (cctray/cctray-handler-for pipeline (:state pipeline) "http://localhost:8080/pipeline")]
+    (runners/start-one-run-after-another pipeline)
+    (ring-server/serve (mk-routes (ui/ui-for pipeline) cctray-pipeline-handler)
                                   {:open-browser? true
-                                   :port 8080})))
+                                   :port 8081})))
