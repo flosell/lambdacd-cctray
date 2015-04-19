@@ -64,9 +64,12 @@
   (xml/emit-str
     (xml/element :Projects {} (projects-for pipeline-def pipeline-state base-url))))
 
-(defn cctray-handler-for [pipeline-def state-atom base-url]
-  (fn [& _]
+(defn cctray-handler-for
+  ([pipeline base-url]
+   (cctray-handler-for (:pipeline-def pipeline) (:state pipeline) base-url))
+  ([pipeline-def state-atom base-url] ; deprecated, TODO: remove in subsequent release
+   (fn [& _]
     {:status  200
      :headers {"Content-Type" "application/xml"}
-     :body    (cctray-xml-for pipeline-def @state-atom base-url)}))
+     :body    (cctray-xml-for pipeline-def @state-atom base-url)})))
 

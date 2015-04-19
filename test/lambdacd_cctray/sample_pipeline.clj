@@ -53,7 +53,7 @@
   (let [home-dir (if (not (empty? args)) (first args) (util/create-temp-dir))
         config { :home-dir home-dir }
         pipeline (lambdacd/assemble-pipeline pipeline-structure config)
-        cctray-pipeline-handler (cctray/cctray-handler-for pipeline-structure (:state pipeline) "http://localhost:8081/pipeline")]
+        cctray-pipeline-handler (cctray/cctray-handler-for pipeline "http://localhost:8081/pipeline")]
     (runners/start-one-run-after-another pipeline)
     (ring-server/serve (mk-routes (ui/ui-for pipeline) cctray-pipeline-handler)
                                   {:open-browser? true

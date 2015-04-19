@@ -14,7 +14,7 @@ Work in progress
 (:require [lambdacd-cctray.core :as cctray])
 
 (let [pipeline (lambdacd/assemble   -pipeline pipeline/pipeline-def {})
-      cctray-pipeline-handler (cctray/cctray-handler-for pipeline/pipeline-def (:state pipeline) "http://some-base-url")
+      cctray-pipeline-handler (cctray/cctray-handler-for pipeline "http://some-base-url")
 
   ; ...
 
