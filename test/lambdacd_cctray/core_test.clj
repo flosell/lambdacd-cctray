@@ -15,9 +15,12 @@
      (control-flow/either
        some-other-name)))
 
-(def some-state {8 { [1] {:status :success}}
-                 3 { [1 2] {:status :running}}
-                 2 { [1 2] {:status :failure}}})
+(def some-state {8 { [1] {:status :success
+                          :most-recent-update-at (t/date-time 2015 1 2 3 40 0)}}
+                 3 { [1 2] {:status :running
+                            :most-recent-update-at (t/date-time 2015 1 2 3 40 1)}}
+                 2 { [1 2] {:status :failure
+                            :most-recent-update-at (t/date-time 2015 1 2 3 40 2)}}})
 
 (deftest cc-xmltray-for-test
   (testing "That it produces a valid cctray-xml"
@@ -28,7 +31,7 @@
               :activity :sleeping
               :last-build-status :success
               :last-build-label "8"
-              :last-build-time (t/date-time 2005 9 28 9 30 34 0)
+              :last-build-time (t/date-time 2015 1 2 3 40 0)
               :web-url "some/base/url/old/?build=8"
               :messages          []
               :next-build-time   nil
@@ -37,7 +40,7 @@
                :activity :building
                :last-build-status :failure
                :last-build-label "3"
-               :last-build-time (t/date-time 2005 9 28 9 30 34 0)
+               :last-build-time (t/date-time 2015 1 2 3 40 1)
                :web-url "some/base/url/old/?build=3"
                :messages          []
                :next-build-time   nil

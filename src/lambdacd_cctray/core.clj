@@ -1,6 +1,7 @@
 (ns lambdacd-cctray.core
   (:require [clojure.data.xml :as xml]
-            [lambdacd.presentation.pipeline-structure :as lp]))
+            [lambdacd.presentation.pipeline-structure :as lp]
+            [clj-time.format :as f ]))
 
 (defn- has-step-id [step-id [k v]]
   (get v step-id)
@@ -32,6 +33,11 @@
       :failure "Failure"
       "Unknown")))
 
+(defn- last-build-time-for [step]
+  (let [most-recent-update (:most-recent-update-at (:result step))
+        formatted (f/unparse (f/formatters :date-time) most-recent-update)]
+    formatted))
+
 (defn- project-for [state base-url step-info]
   (let [states-for-step (states-for (:step-id step-info) state)
         state-for-step (first states-for-step)
@@ -40,7 +46,7 @@
                            :activity (:activity state-for-step)
                            :lastBuildStatus (last-build-status-for states-for-step)
                            :lastBuildLabel (str last-build-number)
-                           :lastBuildTime "2005-09-28T10:30:34+01:00"
+                           :lastBuildTime (last-build-time-for state-for-step)
                            :webUrl (str base-url "/old/?build=" last-build-number)} [])))
 
 (defn- flatten-pipeline [pipeline-representation]
