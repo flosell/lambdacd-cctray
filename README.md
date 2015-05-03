@@ -1,5 +1,5 @@
 # CCTray support for LambdaCD
-
+Exposes a `cctray.xml` for your [LambdaCD](https://github.com/flosell/lambdacd) pipeline to integrate with build monitoring tools such as [nevergreen](http://nevergreen.io/) or [CCMenu](http://ccmenu.org/)
 
 ## Status
 
