@@ -1,4 +1,4 @@
-(defproject lambdacd-cctray "0.1.5-SNAPSHOT"
+(defproject lambdacd-cctray "0.2.0"
   :description "cctray support for lambdacd"
   :url "http://github.com/flosell/lambdacd-cctray"
   :license {:name "Apache License, version 2.0"
@@ -6,7 +6,7 @@
   :deploy-repositories [["clojars" {:creds :gpg}]
                         ["releases" :clojars]]
   :dependencies [[org.clojure/clojure "1.6.0"]
-                 [lambdacd "0.2.0"]
+                 [lambdacd "0.5.0"]
                  [clj-time "0.9.0"]
                  [org.clojure/data.xml "0.0.8"]]
   :profiles {:dev {:dependencies [[clj-cctray "0.8.0"]

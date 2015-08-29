@@ -1,12 +1,12 @@
 (ns lambdacd-cctray.core
   (:require [clojure.data.xml :as xml]
             [lambdacd.presentation.pipeline-structure :as lp]
+            [lambdacd.internal.pipeline-state :as pipeline-state]
             [clojure.string :as s]
             [clj-time.format :as f ]))
 
 (defn- has-step-id [step-id [k v]]
-  (get v step-id)
-)
+  (get v step-id))
 
 (defn state-for [step-id [k v]]
   (let [build-number k
@@ -66,10 +66,10 @@
 
 (defn cctray-handler-for
   ([pipeline base-url]
-   (cctray-handler-for (:pipeline-def pipeline) (:state pipeline) base-url))
-  ([pipeline-def state-atom base-url] ; deprecated, TODO: remove in subsequent release
-   (fn [& _]
-    {:status  200
-     :headers {"Content-Type" "application/xml"}
-     :body    (cctray-xml-for pipeline-def @state-atom base-url)})))
+   (let [pipeline-def    (:pipeline-def pipeline)
+         state-component  (:pipeline-state-component (:context pipeline))]
+     (fn [& _]
+       {:status  200
+        :headers {"Content-Type" "application/xml"}
+        :body    (cctray-xml-for pipeline-def (pipeline-state/get-all state-component) base-url)}))))
 

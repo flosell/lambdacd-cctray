@@ -39,8 +39,7 @@
   wait-for-interaction
   (either
     some-failing-step
-    some-successful-step)
- ))
+    some-successful-step)))
 
 
 (defn mk-routes [ pipeline-routes cctray-pipeline-handler]
