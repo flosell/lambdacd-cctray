@@ -2,7 +2,9 @@
 
 ## 0.2.0
 
-* Support LambdaCD versions > 0.5.0. Older versions are no longer supported but versions down to 0.4.1 might still work.
+* Support LambdaCD versions > 0.5.0 (#2).
+  Older versions are no longer supported but versions down to 0.4.1 might still work.
+* Determine most recent build by step start date instead of build number to ensure proper behavior when retriggering (#3)
 * API Changes: 
   * Removed deprecated `(cctray-handler-for pipeline-def state-atom base-ur)`. Use the interface as shown in README
 

@@ -5,20 +5,24 @@
             [clojure.string :as s]
             [clj-time.format :as f ]))
 
-(defn- has-step-id [step-id [k v]]
-  (get v step-id))
+(defn- has-step-id [step-id [_ steps]]
+  (get steps step-id))
 
-(defn state-for [step-id [k v]]
+(defn state-for [step-id [k steps]]
   (let [build-number k
-        status (get v step-id)
+        status (get steps step-id)
         activity (if (= (:status status) :running) "Building" "Sleeping")]
     {:build-number build-number
      :activity activity
      :result status}))
 
+(defn- first-updated [step-id]
+  (fn [[_ steps]]
+    (:first-updated-at (get steps step-id))))
+
 (defn- states-for [step-id state]
   (let [builds-with-step-id (filter #(has-step-id step-id %) (seq state))
-        by-most-recent (reverse (sort-by first builds-with-step-id))]
+        by-most-recent (reverse (sort-by (first-updated step-id) builds-with-step-id))]
     (map #(state-for step-id %) by-most-recent)))
 
 (defn- last-build-status-for [states-for-step]
