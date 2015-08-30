@@ -13,7 +13,7 @@ cd ${SCRIPT_DIR}/..
 VERSION=$(chag latest)
 CHANGELOG=$(chag contents)
 USER="flosell"
-REPO="lambdacd"
+REPO="lambdacd-cctray"
 
 echo "Publishing Release to GitHub: "
 echo "Version ${VERSION}"
