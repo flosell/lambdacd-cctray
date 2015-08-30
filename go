@@ -14,7 +14,7 @@ push() {
 }
 
 release() {
-  test && lein release "$1" && scripts/github-release.sh
+  test && lein release && scripts/github-release.sh
 }
 
 function serve() {
