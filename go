@@ -14,7 +14,7 @@ push() {
 }
 
 release() {
-  lein release "$1"
+  test && lein release "$1" && scripts/github-release.sh
 }
 
 function serve() {
@@ -30,7 +30,8 @@ goal:
     test     -- run unit tests
     testall  -- run all tests
     push     -- run all tests and push current state
-    serve    -- run the sample pipeline"
+    serve    -- run the sample pipeline
+    release  -- release current version"
 
     exit 1
 fi
