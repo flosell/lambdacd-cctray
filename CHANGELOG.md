@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.0
+
+* API Changes:
+  * Changed interface for `cctray-xml-for` to match that of `cctray-handler-for`:
+
+    ```clojure
+    (:require [lambdacd-cctray.core :as cctray])
+
+    (let [pipeline (lambdacd/assemble-pipeline pipeline/pipeline-def {})
+          cctray-xml (cctray/cctray-xml-for pipeline "http://some-base-url")
+    ```
+
+
 ## 0.2.0
 
 * Support LambdaCD versions > 0.5.0 (#2).

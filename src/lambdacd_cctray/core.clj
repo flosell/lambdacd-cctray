@@ -8,7 +8,7 @@
 (defn- has-step-id [step-id [_ steps]]
   (get steps step-id))
 
-(defn state-for [step-id [k steps]]
+(defn- state-for [step-id [k steps]]
   (let [build-number k
         status (get steps step-id)
         activity (if (= (:status status) :running) "Building" "Sleeping")]
@@ -64,16 +64,16 @@
   (let [pipeline-representation (flatten-pipeline (lp/display-representation def))]
     (map (partial project-for state base-url) pipeline-representation)))
 
-(defn cctray-xml-for [pipeline-def pipeline-state base-url]
-  (xml/emit-str
-    (xml/element :Projects {} (projects-for pipeline-def pipeline-state base-url))))
+(defn cctray-xml-for [pipeline base-url]
+  (let [pipeline-def     (:pipeline-def pipeline)
+        state-component  (:pipeline-state-component (:context pipeline))
+        pipeline-state   (pipeline-state/get-all state-component)]
+    (xml/emit-str
+      (xml/element :Projects {} (projects-for pipeline-def pipeline-state base-url)))))
 
-(defn cctray-handler-for
-  ([pipeline base-url]
-   (let [pipeline-def    (:pipeline-def pipeline)
-         state-component  (:pipeline-state-component (:context pipeline))]
-     (fn [& _]
-       {:status  200
-        :headers {"Content-Type" "application/xml"}
-        :body    (cctray-xml-for pipeline-def (pipeline-state/get-all state-component) base-url)}))))
+(defn cctray-handler-for [pipeline base-url]
+  (fn [& _]
+    {:status  200
+     :headers {"Content-Type" "application/xml"}
+     :body    (cctray-xml-for pipeline base-url)}))
 

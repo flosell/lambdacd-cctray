@@ -4,6 +4,7 @@
             [clj-cctray.core :as parser]
             [clj-time.core :as t]
             [lambdacd.steps.control-flow :as control-flow]
+            [lambdacd.internal.pipeline-state :as pipeline-state]
             [lambdacd-cctray.core :refer :all]))
 
 (defn some-name [& _])
@@ -25,9 +26,17 @@
                             :first-updated-at (t/date-time 2015 1 2 3 40 2)
                             :most-recent-update-at (t/date-time 2015 1 2 3 40 2)}}})
 
+(defn mock-state-component [state]
+  (reify pipeline-state/PipelineStateComponent
+    (get-all [self] state)))
+
+(defn mock-pipeline [state]
+  {:pipeline-def pipeline-def
+   :context {:pipeline-state-component (mock-state-component state)}})
+
 (deftest cc-xmltray-for-test
   (testing "That it produces a valid cctray-xml"
-    (let [xmlstring (cctray-xml-for pipeline-def some-state  "some/base/url")
+    (let [xmlstring (cctray-xml-for (mock-pipeline some-state)  "some/base/url")
           xmlstream (io/input-stream (.getBytes xmlstring))
           projects (parser/get-projects xmlstream)]
       (is (= {:name "some-name"
