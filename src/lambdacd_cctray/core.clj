@@ -61,7 +61,7 @@
     (concat pipeline-representation children-reps)))
 
 (defn- projects-for [def state base-url]
-  (let [pipeline-representation (flatten-pipeline (lp/display-representation def))]
+  (let [pipeline-representation (flatten-pipeline (lp/pipeline-display-representation def))]
     (map (partial project-for state base-url) pipeline-representation)))
 
 (defn cctray-xml-for [pipeline base-url]
