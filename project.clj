@@ -1,4 +1,4 @@
-(defproject lambdacd-cctray "0.3.1"
+(defproject lambdacd-cctray "0.4.0"
   :description "cctray support for lambdacd"
   :url "http://github.com/flosell/lambdacd-cctray"
   :license {:name "Apache License, version 2.0"
