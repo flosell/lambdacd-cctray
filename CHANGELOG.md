@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0
+
+* Support LambdaCD versions 0.5.1 (#4). Earlier versions of LambdaCD are no longer supported.
+
 ## 0.3.0
 
 * API Changes:
