@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.4.1
+
+* Support multiple pipelines.
+* Support prefixing builds with pipeline name from config map.
+
+* API Changes:
+  * base-url now configured through pipelines config map.
+  * Deprecate base-url as argument for `cctray-xml-for` and `cctray-handler-for`.
+
 ## 0.4.0
 
 * Support LambdaCD versions 0.5.1 (#4). Earlier versions of LambdaCD are no longer supported.

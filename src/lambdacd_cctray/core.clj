@@ -3,7 +3,7 @@
             [lambdacd.presentation.pipeline-structure :as lp]
             [lambdacd.internal.pipeline-state :as pipeline-state]
             [clojure.string :as s]
-            [clj-time.format :as f ]))
+            [clj-time.format :as f]))
 
 (defn- has-step-id [step-id [_ steps]]
   (get steps step-id))
@@ -13,8 +13,8 @@
         status (get steps step-id)
         activity (if (= (:status status) :running) "Building" "Sleeping")]
     {:build-number build-number
-     :activity activity
-     :result status}))
+     :activity     activity
+     :result       status}))
 
 (defn- first-updated [step-id]
   (fn [[_ steps]]
@@ -43,37 +43,52 @@
         formatted (f/unparse (f/formatters :date-time) most-recent-update)]
     formatted))
 
-(defn- project-for [state base-url step-info]
+(defn- project-for [state config fallback-base-url step-info]
   (let [step-id (:step-id step-info)
         formatted-step-id (s/join "-" step-id)
         states-for-step (states-for step-id state)
         state-for-step (first states-for-step)
-        last-build-number (:build-number state-for-step)]
-    (xml/element :Project {:name (:name step-info)
-                           :activity (:activity state-for-step)
+        last-build-number (:build-number state-for-step)
+        pipeline-name (:name config)
+        step-name (:name step-info)
+        name (if pipeline-name
+               (str pipeline-name " :: " step-name)
+               step-name)
+        base-url (or (:ui-url config) fallback-base-url)]
+    (xml/element :Project {:name            name
+                           :activity        (:activity state-for-step)
                            :lastBuildStatus (last-build-status-for states-for-step)
-                           :lastBuildLabel (str last-build-number)
-                           :lastBuildTime (last-build-time-for state-for-step)
-                           :webUrl (str base-url "/#/builds/" last-build-number "/" formatted-step-id)} [])))
+                           :lastBuildLabel  (str last-build-number)
+                           :lastBuildTime   (last-build-time-for state-for-step)
+                           :webUrl          (str base-url "/#/builds/" last-build-number "/" formatted-step-id)} [])))
 
 (defn- flatten-pipeline [pipeline-representation]
   (let [children-reps (flatten (map #(flatten-pipeline (:children %)) pipeline-representation))]
     (concat pipeline-representation children-reps)))
 
-(defn- projects-for [def state base-url]
-  (let [pipeline-representation (flatten-pipeline (lp/pipeline-display-representation def))]
-    (map (partial project-for state base-url) pipeline-representation)))
+(defn- projects-for [pipeline fallback-base-url]
+  (let [def (:pipeline-def pipeline)
+        context (:context pipeline)
+        config (:config context)
+        state-component (:pipeline-state-component context)
+        state (pipeline-state/get-all state-component)
+        pipeline-representation (flatten-pipeline (lp/pipeline-display-representation def))]
+    (map (partial project-for state config fallback-base-url) pipeline-representation)))
 
-(defn cctray-xml-for [pipeline base-url]
-  (let [pipeline-def     (:pipeline-def pipeline)
-        state-component  (:pipeline-state-component (:context pipeline))
-        pipeline-state   (pipeline-state/get-all state-component)]
-    (xml/emit-str
-      (xml/element :Projects {} (projects-for pipeline-def pipeline-state base-url)))))
+(defn cctray-xml-for
+  ([pipeline]
+   (cctray-xml-for pipeline nil))
+  ([pipelines fallback-base-url]
+   (let [pipelines (if (map? pipelines) [pipelines] pipelines)]
+     (xml/emit-str
+       (xml/element :Projects {} (flatten (map #(projects-for % fallback-base-url) pipelines)))))))
 
-(defn cctray-handler-for [pipeline base-url]
-  (fn [& _]
-    {:status  200
-     :headers {"Content-Type" "application/xml"}
-     :body    (cctray-xml-for pipeline base-url)}))
+(defn cctray-handler-for
+  ([pipeline]
+   (cctray-handler-for pipeline nil))
+  ([pipeline fallback-base-url]
+   (fn [& _]
+     {:status  200
+      :headers {"Content-Type" "application/xml"}
+      :body    (cctray-xml-for pipeline fallback-base-url)})))
 

@@ -8,11 +8,13 @@ Exposes a `cctray.xml` for your [LambdaCD](https://github.com/flosell/lambdacd) 
 [![Clojars Project](http://clojars.org/lambdacd-cctray/latest-version.svg)](http://clojars.org/lambdacd-cctray)
 ## Usage
 
+### Single pipeline
+
 ```clojure
 (:require [lambdacd-cctray.core :as cctray])
 
-(let [pipeline (lambdacd/assemble-pipeline pipeline/pipeline-def {})
-      cctray-pipeline-handler (cctray/cctray-handler-for pipeline "http://some-base-url")
+(let [pipeline (lambdacd/assemble-pipeline pipeline/pipeline-def {:ui-url "http://some-base-url"})
+      cctray-pipeline-handler (cctray/cctray-handler-for pipeline)
 
   ; ...
 
@@ -20,6 +22,20 @@ Exposes a `cctray.xml` for your [LambdaCD](https://github.com/flosell/lambdacd) 
 ```
 
 For a full example, see [test/lambdacd_cctray/sample_pipeline.clj](test/lambdacd_cctray/sample_pipeline.clj)
+
+### Multiple pipelines
+
+```clojure
+(:require [lambdacd-cctray.core :as cctray])
+
+(let [some-pipeline (lambdacd/assemble-pipeline pipeline/some-pipeline-def {:ui-url "http://some-base-url/some-pipeline"})
+      some-other-pipeline (lambdacd/assemble-pipeline pipeline/some-other-pipeline-def {:ui-url "http://some-base-url/some-other-pipeline"})
+      cctray-pipeline-handler (cctray/cctray-handler-for [some-pipeline some-other-pipeline])
+
+  ; ...
+
+  (GET "/cctray/pipeline.xml" [] cctray-pipeline-handler)
+```
 
 ## Development
 
