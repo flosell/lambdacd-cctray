@@ -35,14 +35,14 @@
   (manualtrigger/wait-for-manual-trigger nil ctx))
 
 (def pipeline-structure `(
-  some-slow-step
-  wait-for-interaction
-  (either
-    some-failing-step
-    some-successful-step)))
+                           some-slow-step
+                           wait-for-interaction
+                           (either
+                             some-failing-step
+                             some-successful-step)))
 
 
-(defn mk-routes [ pipeline-routes cctray-pipeline-handler]
+(defn mk-routes [pipeline-routes cctray-pipeline-handler]
   (routes
     (GET "/" [] (resp/redirect "pipeline/"))
     (context "/pipeline" [] pipeline-routes)
@@ -50,10 +50,10 @@
 
 (defn -main [& args]
   (let [home-dir (if (not (empty? args)) (first args) (util/create-temp-dir))
-        config { :home-dir home-dir }
+        config {:home-dir home-dir}
         pipeline (lambdacd/assemble-pipeline pipeline-structure config)
         cctray-pipeline-handler (cctray/cctray-handler-for pipeline "http://localhost:8081/pipeline")]
     (runners/start-one-run-after-another pipeline)
     (ring-server/serve (mk-routes (ui/ui-for pipeline) cctray-pipeline-handler)
-                                  {:open-browser? true
-                                   :port 8081})))
+                       {:open-browser? true
+                        :port          8081})))

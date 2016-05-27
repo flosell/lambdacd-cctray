@@ -3,7 +3,7 @@
             [lambdacd.presentation.pipeline-structure :as lp]
             [lambdacd.internal.pipeline-state :as pipeline-state]
             [clojure.string :as s]
-            [clj-time.format :as f ]))
+            [clj-time.format :as f]))
 
 (defn- has-step-id [step-id [_ steps]]
   (get steps step-id))
@@ -13,8 +13,8 @@
         status (get steps step-id)
         activity (if (= (:status status) :running) "Building" "Sleeping")]
     {:build-number build-number
-     :activity activity
-     :result status}))
+     :activity     activity
+     :result       status}))
 
 (defn- first-updated [step-id]
   (fn [[_ steps]]
@@ -49,12 +49,12 @@
         states-for-step (states-for step-id state)
         state-for-step (first states-for-step)
         last-build-number (:build-number state-for-step)]
-    (xml/element :Project {:name (:name step-info)
-                           :activity (:activity state-for-step)
+    (xml/element :Project {:name            (:name step-info)
+                           :activity        (:activity state-for-step)
                            :lastBuildStatus (last-build-status-for states-for-step)
-                           :lastBuildLabel (str last-build-number)
-                           :lastBuildTime (last-build-time-for state-for-step)
-                           :webUrl (str base-url "/#/builds/" last-build-number "/" formatted-step-id)} [])))
+                           :lastBuildLabel  (str last-build-number)
+                           :lastBuildTime   (last-build-time-for state-for-step)
+                           :webUrl          (str base-url "/#/builds/" last-build-number "/" formatted-step-id)} [])))
 
 (defn- flatten-pipeline [pipeline-representation]
   (let [children-reps (flatten (map #(flatten-pipeline (:children %)) pipeline-representation))]
@@ -65,9 +65,9 @@
     (map (partial project-for state base-url) pipeline-representation)))
 
 (defn cctray-xml-for [pipeline base-url]
-  (let [pipeline-def     (:pipeline-def pipeline)
-        state-component  (:pipeline-state-component (:context pipeline))
-        pipeline-state   (pipeline-state/get-all state-component)]
+  (let [pipeline-def (:pipeline-def pipeline)
+        state-component (:pipeline-state-component (:context pipeline))
+        pipeline-state (pipeline-state/get-all state-component)]
     (xml/emit-str
       (xml/element :Projects {} (projects-for pipeline-def pipeline-state base-url)))))
 
