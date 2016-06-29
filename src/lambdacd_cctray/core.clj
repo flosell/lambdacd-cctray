@@ -43,6 +43,12 @@
         formatted (f/unparse (f/formatters :date-time) most-recent-update)]
     formatted))
 
+(defn- get-add-prefix-with-default [config]
+  (let [enabled (:cctray-add-prefix config)]
+    (if (nil? enabled)
+      true
+      enabled)))
+
 (defn- project-for [state config fallback-base-url step-info]
   (let [step-id (:step-id step-info)
         formatted-step-id (s/join "-" step-id)
@@ -50,8 +56,9 @@
         state-for-step (first states-for-step)
         last-build-number (:build-number state-for-step)
         pipeline-name (:name config)
+        add-prefix (get-add-prefix-with-default config)
         step-name (:name step-info)
-        name (if pipeline-name
+        name (if (and add-prefix pipeline-name)
                (str pipeline-name " :: " step-name)
                step-name)
         base-url (or (:ui-url config) fallback-base-url)]
