@@ -37,6 +37,16 @@ For a full example, see [test/lambdacd_cctray/sample_pipeline.clj](test/lambdacd
   (GET "/cctray/pipeline.xml" [] cctray-pipeline-handler)
 ```
 
+### Prefixing
+
+By default the step names in the resulting xml will be prefixed with the corresonding pipeline name.
+This can be disabled with the key `cctray-add-prefix` in the pipeline config:
+ ```clojure
+ (let [some-pipeline (lambdacd/assemble-pipeline pipeline/some-pipeline-def {:ui-url "http://some-base-url/some-pipeline"
+                                                                             :cctray-add-prefix false})
+ ...
+ ```
+
 ## Development
 
 Call `./go`

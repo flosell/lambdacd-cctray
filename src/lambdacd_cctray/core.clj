@@ -50,8 +50,9 @@
         state-for-step (first states-for-step)
         last-build-number (:build-number state-for-step)
         pipeline-name (:name config)
+        add-prefix (get config :cctray-add-prefix true)
         step-name (:name step-info)
-        name (if pipeline-name
+        name (if (and add-prefix pipeline-name)
                (str pipeline-name " :: " step-name)
                step-name)
         base-url (or (:ui-url config) fallback-base-url)]
