@@ -30,15 +30,13 @@
   (reify pipeline-state/PipelineStateComponent
     (get-all [self] state)))
 
-(defn mock-pipeline [state name ui-url cctray-add-prefix]
+(defn mock-pipeline [state config]
   {:pipeline-def pipeline-def
-   :context      {:pipeline-state-component (mock-state-component state) :config {:name   name
-                                                                                  :ui-url ui-url
-                                                                                  :cctray-add-prefix cctray-add-prefix}}})
+   :context      {:pipeline-state-component (mock-state-component state) :config config}})
 
 (deftest cc-xmltray-for-test
   (testing "That it produces a valid cctray-xml w/o name and ui-url"
-    (let [xmlstring (cctray-xml-for (mock-pipeline some-state nil nil nil) "some/base/url")
+    (let [xmlstring (cctray-xml-for (mock-pipeline some-state {}) "some/base/url")
           xmlstream (io/input-stream (.getBytes xmlstring))
           projects (parser/get-projects xmlstream)]
       (is (= {:name              "some-name"
@@ -60,7 +58,7 @@
               :next-build-time   nil
               :prognosis         :sick} (nth projects 2)))))
   (testing "That it produces a valid cctray-xml w/ name"
-    (let [xmlstring (cctray-xml-for (mock-pipeline some-state "some-crazy-pipeline" nil nil) "some/base/url")
+    (let [xmlstring (cctray-xml-for (mock-pipeline some-state {:name   "some-crazy-pipeline"}) "some/base/url")
           xmlstream (io/input-stream (.getBytes xmlstring))
           projects (parser/get-projects xmlstream)
           names (map :name projects)]
@@ -69,8 +67,10 @@
               "some-crazy-pipeline :: some-other-name"]
              names))))
   (testing "That it produces a valid cctray-xml for multiple pipelines"
-    (let [xmlstring (cctray-xml-for [(mock-pipeline some-state "some-crazy-pipeline" "some/crazy/url" nil)
-                                     (mock-pipeline some-state "some-other-pipeline" "some/other/url" nil)]
+    (let [xmlstring (cctray-xml-for [(mock-pipeline some-state {:name   "some-crazy-pipeline"
+                                                                :ui-url "some/crazy/url"})
+                                     (mock-pipeline some-state {:name   "some-other-pipeline"
+                                                                :ui-url "some/other/url"})]
                                     "some/base/url")
           xmlstream (io/input-stream (.getBytes xmlstring))
           projects (parser/get-projects xmlstream)]
@@ -89,7 +89,8 @@
               "some/other/url/#/builds/2/1-2"]
              (map :web-url projects)))))
   (testing "That it produces a valid cctray-xml with explicit enabled prefix"
-    (let [xmlstring (cctray-xml-for (mock-pipeline some-state "some-crazy-pipeline" nil true) "some/base/url")
+    (let [xmlstring (cctray-xml-for (mock-pipeline some-state {:name   "some-crazy-pipeline"
+                                                               :cctray-add-prefix true}) "some/base/url")
           xmlstream (io/input-stream (.getBytes xmlstring))
           projects (parser/get-projects xmlstream)
           names (map :name projects)]
@@ -98,7 +99,8 @@
               "some-crazy-pipeline :: some-other-name"]
              names))))
   (testing "That it produces a valid cctray-xml with disabled prefix"
-    (let [xmlstring (cctray-xml-for (mock-pipeline some-state "some-crazy-pipeline" nil false) "some/base/url")
+    (let [xmlstring (cctray-xml-for (mock-pipeline some-state {:name   "some-crazy-pipeline"
+                                                               :cctray-add-prefix false}) "some/base/url")
           xmlstream (io/input-stream (.getBytes xmlstring))
           projects (parser/get-projects xmlstream)
           names (map :name projects)]
