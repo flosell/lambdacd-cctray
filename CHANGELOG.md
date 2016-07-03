@@ -2,7 +2,7 @@
 
 ## 0.4.2
 
-* Add option `cctray-add-prefix` to disable or enable (default) prefixing step names with pipeline name
+* Add option `cctray-add-prefix` to disable or enable (default) prefixing step names with pipeline name (thanks @SimonMonecke)
 
 ## 0.4.1
 
