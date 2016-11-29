@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.0
+
+Compatibility-release to remove dependency on deprecated functions in LambdaCD.
+
+* Breaking changes: 
+  * Requires LambdaCD 0.11.0 and Clojure 1.7.0
+
 ## 0.4.2
 
 * Add option `cctray-add-prefix` to disable or enable (default) prefixing step names with pipeline name (thanks @SimonMonecke)
