@@ -47,11 +47,12 @@
 
 (defn mock-pipeline [state config]
   {:pipeline-def pipeline-def
-   :context      {:pipeline-state-component (mock-state-component state) :config config}})
+   :context      {:pipeline-state-component (mock-state-component state)
+                  :config config}})
 
 (deftest cc-xmltray-for-test
   (testing "That it produces a valid cctray-xml w/o name and ui-url"
-    (let [xmlstring (cctray-xml-for (mock-pipeline some-state {}) "some/base/url")
+    (let [xmlstring (cctray-xml-for (mock-pipeline some-state {:ui-url "some/base/url"}))
           xmlstream (io/input-stream (.getBytes xmlstring))
           projects (parser/get-projects xmlstream)]
       (is (= {:name              "some-name"
@@ -82,22 +83,21 @@
               :next-build-time   nil
               :prognosis         :healthy} (nth projects 3)))))
   (testing "That it produces a valid cctray-xml w/ name"
-    (let [xmlstring (cctray-xml-for (mock-pipeline some-state {:name   "some-crazy-pipeline"}) "some/base/url")
+    (let [xmlstring (cctray-xml-for (mock-pipeline some-state {:name   "some-crazy-pipeline"
+                                                               :ui-url "some-base-url"}))
           xmlstream (io/input-stream (.getBytes xmlstring))
           projects (parser/get-projects xmlstream)
           names (map :name projects)]
       (is (= ["some-crazy-pipeline :: some-name"
               "some-crazy-pipeline :: either"
               "some-crazy-pipeline :: some-other-name"
-              "some-crazy-pipeline :: some-other-other-name"
-              ]
+              "some-crazy-pipeline :: some-other-other-name"]
              names))))
   (testing "That it produces a valid cctray-xml for multiple pipelines"
     (let [xmlstring (cctray-xml-for [(mock-pipeline some-state {:name   "some-crazy-pipeline"
                                                                 :ui-url "some/crazy/url"})
                                      (mock-pipeline some-state {:name   "some-other-pipeline"
-                                                                :ui-url "some/other/url"})]
-                                    "some/base/url")
+                                                                :ui-url "some/other/url"})])
           xmlstream (io/input-stream (.getBytes xmlstring))
           projects (parser/get-projects xmlstream)]
       (is (= ["some-crazy-pipeline :: some-name"
@@ -116,12 +116,11 @@
               "some/other/url/#/builds/8/1"
               "some/other/url/#/builds//2"
               "some/other/url/#/builds/3/1-2"
-              "some/other/url/#/builds/3/2-2"
-              ]
+              "some/other/url/#/builds/3/2-2"]
              (map :web-url projects)))))
   (testing "That it produces a valid cctray-xml with explicit enabled prefix"
     (let [xmlstring (cctray-xml-for (mock-pipeline some-state {:name   "some-crazy-pipeline"
-                                                               :cctray-add-prefix true}) "some/base/url")
+                                                               :cctray-add-prefix true}))
           xmlstream (io/input-stream (.getBytes xmlstring))
           projects (parser/get-projects xmlstream)
           names (map :name projects)]
@@ -132,7 +131,7 @@
              names))))
   (testing "That it produces a valid cctray-xml with disabled prefix"
     (let [xmlstring (cctray-xml-for (mock-pipeline some-state {:name   "some-crazy-pipeline"
-                                                               :cctray-add-prefix false}) "some/base/url")
+                                                               :cctray-add-prefix false}))
           xmlstream (io/input-stream (.getBytes xmlstring))
           projects (parser/get-projects xmlstream)
           names (map :name projects)]
@@ -140,4 +139,20 @@
               "either"
               "some-other-name"
               "some-other-other-name"]
-             names)))))
+             names))))
+  (testing "That a missing ui-url configuration does not break everything"
+    (let [xmlstring (cctray-xml-for [(mock-pipeline some-state {:name   "some-crazy-pipeline"
+                                                                :ui-url nil})
+                                     (mock-pipeline some-state {:name   "some-other-pipeline"
+                                                                :ui-url nil})])
+          xmlstream (io/input-stream (.getBytes xmlstring))
+          projects (parser/get-projects xmlstream)]
+      (is (= ["/#/builds/8/1"
+              "/#/builds//2"
+              "/#/builds/3/1-2"
+              "/#/builds/3/2-2"
+              "/#/builds/8/1"
+              "/#/builds//2"
+              "/#/builds/3/1-2"
+              "/#/builds/3/2-2"]
+             (map :web-url projects))))))

@@ -2,10 +2,11 @@
 
 ## 0.5.0
 
-Compatibility-release to remove dependency on deprecated functions in LambdaCD.
+Compatibility and cleanup-release; Removes dependency on deprecated functions in LambdaCD.
 
 * Breaking changes: 
   * Requires LambdaCD 0.11.0 and Clojure 1.7.0
+  * Remove deprecated `base-url` argument for `cctray-xml-for` and `cctray-handler-for`
 
 ## 0.4.2
 

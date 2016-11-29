@@ -51,52 +51,50 @@
         formatted          (f/unparse (f/formatters :date-time) most-recent-update)]
     formatted))
 
-(defn- project-for [context config fallback-base-url step-info]
-  (let [step-id           (:step-id step-info)
-        formatted-step-id (s/join "-" step-id)
-        states-for-step   (states-for step-id context)
-        state-for-step    (first states-for-step)
-        last-build-number (:build-number state-for-step)
-        pipeline-name     (:name config)
-        add-prefix        (get config :cctray-add-prefix true)
-        step-name         (:name step-info)
-        name              (if (and add-prefix pipeline-name)
-                            (str pipeline-name " :: " step-name)
-                            step-name)
-        base-url          (or (:ui-url config) fallback-base-url)]
-    (xml/element :Project {:name            name
-                           :activity        (:activity state-for-step)
+(defn web-url [context last-build-number step-id]
+  (let [base-url          (:ui-url (:config context))
+        formatted-step-id (s/join "-" step-id)]
+    (str base-url "/#/builds/" last-build-number "/" formatted-step-id)))
+
+(defn- step-name [context step-info]
+  (let [config        (:config context)
+        pipeline-name (:name config)
+        add-prefix    (get config :cctray-add-prefix true)
+        step-name     (:name step-info)]
+    (if (and add-prefix pipeline-name)
+      (str pipeline-name " :: " step-name)
+      step-name)))
+
+(defn- project-for [context step-info]
+  (let [step-id                (:step-id step-info)
+        states-for-step        (states-for step-id context)
+        state-for-current-step (first states-for-step)
+        current-build-number   (:build-number state-for-current-step)]
+    (xml/element :Project {:name            (step-name context step-info)
+                           :activity        (:activity state-for-current-step)
                            :lastBuildStatus (last-build-status-for states-for-step)
-                           :lastBuildLabel  (str last-build-number)
-                           :lastBuildTime   (last-build-time-for state-for-step)
-                           :webUrl          (str base-url "/#/builds/" last-build-number "/" formatted-step-id)} [])))
+                           :lastBuildLabel  (str current-build-number)
+                           :lastBuildTime   (last-build-time-for state-for-current-step)
+                           :webUrl          (web-url context current-build-number step-id)} [])))
 
 (defn- flatten-pipeline [pipeline-representation]
   (let [children-reps (flatten (map #(flatten-pipeline (:children %)) pipeline-representation))]
     (concat pipeline-representation children-reps)))
 
-(defn- projects-for [pipeline fallback-base-url]
-  (let [def                     (:pipeline-def pipeline)
-        context                 (:context pipeline)
-        config                  (:config context)
-        state-component         (:pipeline-state-component context)
-        pipeline-representation (flatten-pipeline (lp/pipeline-display-representation def))]
-    (map (partial project-for context config fallback-base-url) pipeline-representation)))
+(defn- projects-for [pipeline]
+  (for [step-info (flatten-pipeline (lp/pipeline-display-representation (:pipeline-def pipeline)))]
+    (project-for (:context pipeline) step-info)))
 
 (defn cctray-xml-for
-  ([pipeline]
-   (cctray-xml-for pipeline nil))
-  ([pipelines fallback-base-url]
+  ([pipelines]
    (let [pipelines (if (map? pipelines) [pipelines] pipelines)]
      (xml/emit-str
-       (xml/element :Projects {} (flatten (map #(projects-for % fallback-base-url) pipelines)))))))
+       (xml/element :Projects {} (flatten (map #(projects-for %) pipelines)))))))
 
 (defn cctray-handler-for
   ([pipeline]
-   (cctray-handler-for pipeline nil))
-  ([pipeline fallback-base-url]
    (fn [& _]
      {:status  200
       :headers {"Content-Type" "application/xml"}
-      :body    (cctray-xml-for pipeline fallback-base-url)})))
+      :body    (cctray-xml-for pipeline)})))
 
