@@ -1,61 +1,69 @@
 (ns lambdacd-cctray.core
   (:require [clojure.data.xml :as xml]
             [lambdacd.presentation.pipeline-structure :as lp]
-            [lambdacd.internal.pipeline-state :as pipeline-state]
+            [lambdacd.state.core :as state]
             [clojure.string :as s]
             [clj-time.format :as f]))
 
-(defn- has-step-id [step-id [_ steps]]
-  (get steps step-id))
+(defn- not-nil? [x]
+  (not (nil? x)))
 
-(defn- state-for [step-id [k steps]]
-  (let [build-number k
-        status (get steps step-id)
-        activity (if (= (:status status) :running) "Building" "Sleeping")]
+(defn- activity-for [step-result]
+  (if (= (:status step-result) :running)
+    "Building"
+    "Sleeping"))
+
+(defn- state-for [ctx build-number step-id]
+  (if-let [step-result (state/get-step-result ctx build-number step-id)]
     {:build-number build-number
-     :activity     activity
-     :result       status}))
+     :activity     (activity-for step-result)
+     :result       step-result}))
 
-(defn- first-updated [step-id]
-  (fn [[_ steps]]
-    (:first-updated-at (get steps step-id))))
+(defn- first-updated [build-state]
+  (:first-updated-at (:result build-state)))
 
-(defn- states-for [step-id state]
-  (let [builds-with-step-id (filter #(has-step-id step-id %) (seq state))
-        by-most-recent (reverse (sort-by (first-updated step-id) builds-with-step-id))]
-    (map #(state-for step-id %) by-most-recent)))
+(defn- states-for [step-id ctx]
+  (->> (state/all-build-numbers ctx)
+       (map #(state-for ctx % step-id))
+       (filter not-nil?)
+       (sort-by first-updated)
+       (reverse)))
+
+(defn- cctray-status-for [step-result]
+  (case (:status step-result)
+    :success "Success"
+    :failure "Failure"
+    "Unknown"))
+
+(defn- current-build-active? [states-for-step]
+  (let [cur-build-status (:status (:result (first states-for-step)))]
+    (or (= cur-build-status :running)
+        (= cur-build-status :waiting))))
 
 (defn- last-build-status-for [states-for-step]
-  (let [current-build (:result (first states-for-step))
-        prev-build (:result (second states-for-step))
-        cur-build-status (:status current-build)
-        build-to-use (if (or (= cur-build-status :running) (= cur-build-status :waiting))
-                       prev-build
-                       current-build)
-        status-to-use (:status build-to-use)]
-    (case status-to-use
-      :success "Success"
-      :failure "Failure"
-      "Unknown")))
+  (let [build-to-use (if (current-build-active? states-for-step)
+                       (second states-for-step)
+                       (first states-for-step))]
+    (cctray-status-for (:result build-to-use))))
 
 (defn- last-build-time-for [step]
   (let [most-recent-update (:most-recent-update-at (:result step))
-        formatted (f/unparse (f/formatters :date-time) most-recent-update)]
+        formatted          (f/unparse (f/formatters :date-time) most-recent-update)]
     formatted))
 
-(defn- project-for [state config fallback-base-url step-info]
-  (let [step-id (:step-id step-info)
+(defn- project-for [context config fallback-base-url step-info]
+  (let [step-id           (:step-id step-info)
         formatted-step-id (s/join "-" step-id)
-        states-for-step (states-for step-id state)
-        state-for-step (first states-for-step)
+        states-for-step   (states-for step-id context)
+        state-for-step    (first states-for-step)
         last-build-number (:build-number state-for-step)
-        pipeline-name (:name config)
-        add-prefix (get config :cctray-add-prefix true)
-        step-name (:name step-info)
-        name (if (and add-prefix pipeline-name)
-               (str pipeline-name " :: " step-name)
-               step-name)
-        base-url (or (:ui-url config) fallback-base-url)]
+        pipeline-name     (:name config)
+        add-prefix        (get config :cctray-add-prefix true)
+        step-name         (:name step-info)
+        name              (if (and add-prefix pipeline-name)
+                            (str pipeline-name " :: " step-name)
+                            step-name)
+        base-url          (or (:ui-url config) fallback-base-url)]
     (xml/element :Project {:name            name
                            :activity        (:activity state-for-step)
                            :lastBuildStatus (last-build-status-for states-for-step)
@@ -68,13 +76,12 @@
     (concat pipeline-representation children-reps)))
 
 (defn- projects-for [pipeline fallback-base-url]
-  (let [def (:pipeline-def pipeline)
-        context (:context pipeline)
-        config (:config context)
-        state-component (:pipeline-state-component context)
-        state (pipeline-state/get-all state-component)
+  (let [def                     (:pipeline-def pipeline)
+        context                 (:context pipeline)
+        config                  (:config context)
+        state-component         (:pipeline-state-component context)
         pipeline-representation (flatten-pipeline (lp/pipeline-display-representation def))]
-    (map (partial project-for state config fallback-base-url) pipeline-representation)))
+    (map (partial project-for context config fallback-base-url) pipeline-representation)))
 
 (defn cctray-xml-for
   ([pipeline]

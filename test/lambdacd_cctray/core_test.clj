@@ -4,7 +4,7 @@
             [clj-cctray.core :as parser]
             [clj-time.core :as t]
             [lambdacd.steps.control-flow :as control-flow]
-            [lambdacd.internal.pipeline-state :as pipeline-state]
+            [lambdacd.state.protocols :as protocols]
             [lambdacd-cctray.core :refer :all]))
 
 (defn some-name [& _])
@@ -34,9 +34,16 @@
                            :first-updated-at      (t/date-time 2015 1 2 3 40 2)
                            :most-recent-update-at (t/date-time 2015 1 2 3 40 2)}}})
 
+(defrecord MockStateComponent [state]
+  protocols/QueryAllBuildNumbersSource
+  (all-build-numbers [self]
+    (keys state))
+  protocols/QueryStepResultsSource
+  (get-step-results [self build-number]
+    (get state build-number))) ; TODO: also implement pipeline structure
+
 (defn mock-state-component [state]
-  (reify pipeline-state/PipelineStateComponent
-    (get-all [self] state)))
+  (->MockStateComponent state))
 
 (defn mock-pipeline [state config]
   {:pipeline-def pipeline-def
