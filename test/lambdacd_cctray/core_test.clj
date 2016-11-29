@@ -9,20 +9,28 @@
 
 (defn some-name [& _])
 (defn some-other-name [& _])
+(defn some-other-other-name [& _])
 
 (def pipeline-def
   `(
      some-name
      (control-flow/either
-       some-other-name)))
+       some-other-name
+       some-other-other-name)))
 
 (def some-state {8 {[1] {:status                :success
                          :first-updated-at      (t/date-time 2015 1 2 3 40 1)
                          :most-recent-update-at (t/date-time 2015 1 2 3 40 0)}}
                  3 {[1 2] {:status                :running
-                           :first-updated-at      (t/date-time 2015 1 2 3 40 1)
-                           :most-recent-update-at (t/date-time 2015 1 2 3 40 1)}}
+                           :first-updated-at      (t/date-time 2015 1 2 3 40 3)
+                           :most-recent-update-at (t/date-time 2015 1 2 3 40 3)}
+                    [2 2] {:status                :waiting
+                           :first-updated-at      (t/date-time 2015 1 2 3 40 3)
+                           :most-recent-update-at (t/date-time 2015 1 2 3 40 3)}}
                  2 {[1 2] {:status                :failure
+                           :first-updated-at      (t/date-time 2015 1 2 3 40 2)
+                           :most-recent-update-at (t/date-time 2015 1 2 3 40 2)}
+                    [2 2] {:status                :success
                            :first-updated-at      (t/date-time 2015 1 2 3 40 2)
                            :most-recent-update-at (t/date-time 2015 1 2 3 40 2)}}})
 
@@ -49,14 +57,23 @@
               :next-build-time   nil
               :prognosis         :healthy} (first projects)))
       (is (= {:name              "some-other-name"
-              :activity          :sleeping
+              :activity          :building
               :last-build-status :failure
-              :last-build-label  "2"
-              :last-build-time   (t/date-time 2015 1 2 3 40 2)
-              :web-url           "some/base/url/#/builds/2/1-2"
+              :last-build-label  "3"
+              :last-build-time   (t/date-time 2015 1 2 3 40 3)
+              :web-url           "some/base/url/#/builds/3/1-2"
               :messages          []
               :next-build-time   nil
-              :prognosis         :sick} (nth projects 2)))))
+              :prognosis         :sick-building} (nth projects 2)))
+      (is (= {:name              "some-other-other-name"
+              :activity          :sleeping
+              :last-build-status :success
+              :last-build-label  "3"
+              :last-build-time   (t/date-time 2015 1 2 3 40 3)
+              :web-url           "some/base/url/#/builds/3/2-2"
+              :messages          []
+              :next-build-time   nil
+              :prognosis         :healthy} (nth projects 3)))))
   (testing "That it produces a valid cctray-xml w/ name"
     (let [xmlstring (cctray-xml-for (mock-pipeline some-state {:name   "some-crazy-pipeline"}) "some/base/url")
           xmlstream (io/input-stream (.getBytes xmlstring))
@@ -64,7 +81,9 @@
           names (map :name projects)]
       (is (= ["some-crazy-pipeline :: some-name"
               "some-crazy-pipeline :: either"
-              "some-crazy-pipeline :: some-other-name"]
+              "some-crazy-pipeline :: some-other-name"
+              "some-crazy-pipeline :: some-other-other-name"
+              ]
              names))))
   (testing "That it produces a valid cctray-xml for multiple pipelines"
     (let [xmlstring (cctray-xml-for [(mock-pipeline some-state {:name   "some-crazy-pipeline"
@@ -77,16 +96,21 @@
       (is (= ["some-crazy-pipeline :: some-name"
               "some-crazy-pipeline :: either"
               "some-crazy-pipeline :: some-other-name"
+              "some-crazy-pipeline :: some-other-other-name"
               "some-other-pipeline :: some-name"
               "some-other-pipeline :: either"
-              "some-other-pipeline :: some-other-name"]
+              "some-other-pipeline :: some-other-name"
+              "some-other-pipeline :: some-other-other-name"]
              (map :name projects)))
       (is (= ["some/crazy/url/#/builds/8/1"
               "some/crazy/url/#/builds//2"
-              "some/crazy/url/#/builds/2/1-2"
+              "some/crazy/url/#/builds/3/1-2"
+              "some/crazy/url/#/builds/3/2-2"
               "some/other/url/#/builds/8/1"
               "some/other/url/#/builds//2"
-              "some/other/url/#/builds/2/1-2"]
+              "some/other/url/#/builds/3/1-2"
+              "some/other/url/#/builds/3/2-2"
+              ]
              (map :web-url projects)))))
   (testing "That it produces a valid cctray-xml with explicit enabled prefix"
     (let [xmlstring (cctray-xml-for (mock-pipeline some-state {:name   "some-crazy-pipeline"
@@ -96,7 +120,8 @@
           names (map :name projects)]
       (is (= ["some-crazy-pipeline :: some-name"
               "some-crazy-pipeline :: either"
-              "some-crazy-pipeline :: some-other-name"]
+              "some-crazy-pipeline :: some-other-name"
+              "some-crazy-pipeline :: some-other-other-name"]
              names))))
   (testing "That it produces a valid cctray-xml with disabled prefix"
     (let [xmlstring (cctray-xml-for (mock-pipeline some-state {:name   "some-crazy-pipeline"
@@ -106,5 +131,6 @@
           names (map :name projects)]
       (is (= ["some-name"
               "either"
-              "some-other-name"]
+              "some-other-name"
+              "some-other-other-name"]
              names)))))
