@@ -47,14 +47,13 @@
     (cctray-status-for (:result build-to-use))))
 
 (defn- last-build-time-for [step]
-  (let [most-recent-update (:most-recent-update-at (:result step))
-        formatted          (f/unparse (f/formatters :date-time) most-recent-update)]
-    formatted))
+  (if-let [most-recent-update (:most-recent-update-at (:result step))]
+    (f/unparse (f/formatters :date-time) most-recent-update)))
 
-(defn web-url [context last-build-number step-id]
+(defn web-url [context build-number step-id]
   (let [base-url          (:ui-url (:config context))
         formatted-step-id (s/join "-" step-id)]
-    (str base-url "/#/builds/" last-build-number "/" formatted-step-id)))
+    (str base-url "/#/builds/" (or build-number -1) "/" formatted-step-id)))
 
 (defn- step-name [context step-info]
   (let [config        (:config context)
@@ -71,9 +70,9 @@
         state-for-current-step (first states-for-step)
         current-build-number   (:build-number state-for-current-step)]
     (xml/element :Project {:name            (step-name context step-info)
-                           :activity        (:activity state-for-current-step)
+                           :activity        (or (:activity state-for-current-step) "Sleeping")
                            :lastBuildStatus (last-build-status-for states-for-step)
-                           :lastBuildLabel  (str current-build-number)
+                           :lastBuildLabel  (str (or current-build-number "unknown"))
                            :lastBuildTime   (last-build-time-for state-for-current-step)
                            :webUrl          (web-url context current-build-number step-id)} [])))
 

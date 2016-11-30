@@ -10,13 +10,15 @@
 (defn some-name [& _])
 (defn some-other-name [& _])
 (defn some-other-other-name [& _])
+(defn some-step-without-history [& _])
 
 (def pipeline-def
   `(
      some-name
      (control-flow/either
        some-other-name
-       some-other-other-name)))
+       some-other-other-name
+       some-step-without-history)))
 
 (def some-state {8 {[1] {:status                :success
                          :first-updated-at      (t/date-time 2015 1 2 3 40 1)
@@ -81,7 +83,16 @@
               :web-url           "some/base/url/#/builds/3/2-2"
               :messages          []
               :next-build-time   nil
-              :prognosis         :healthy} (nth projects 3)))))
+              :prognosis         :healthy} (nth projects 3)))
+      (is (= {:name              "some-step-without-history"
+              :activity          :sleeping
+              :last-build-status :unknown
+              :last-build-label  "unknown"
+              :last-build-time   nil
+              :web-url           "some/base/url/#/builds/-1/3-2" ; invalid build numbers like -1 are treated as "most recent by lambdacd-ui
+              :messages          []
+              :next-build-time   nil
+              :prognosis         :unknown} (nth projects 4)))))
   (testing "That it produces a valid cctray-xml w/ name"
     (let [xmlstring (cctray-xml-for (mock-pipeline some-state {:name   "some-crazy-pipeline"
                                                                :ui-url "some-base-url"}))
@@ -91,7 +102,8 @@
       (is (= ["some-crazy-pipeline :: some-name"
               "some-crazy-pipeline :: either"
               "some-crazy-pipeline :: some-other-name"
-              "some-crazy-pipeline :: some-other-other-name"]
+              "some-crazy-pipeline :: some-other-other-name"
+              "some-crazy-pipeline :: some-step-without-history"]
              names))))
   (testing "That it produces a valid cctray-xml for multiple pipelines"
     (let [xmlstring (cctray-xml-for [(mock-pipeline some-state {:name   "some-crazy-pipeline"
@@ -104,19 +116,23 @@
               "some-crazy-pipeline :: either"
               "some-crazy-pipeline :: some-other-name"
               "some-crazy-pipeline :: some-other-other-name"
+              "some-crazy-pipeline :: some-step-without-history"
               "some-other-pipeline :: some-name"
               "some-other-pipeline :: either"
               "some-other-pipeline :: some-other-name"
-              "some-other-pipeline :: some-other-other-name"]
+              "some-other-pipeline :: some-other-other-name"
+              "some-other-pipeline :: some-step-without-history"]
              (map :name projects)))
       (is (= ["some/crazy/url/#/builds/8/1"
-              "some/crazy/url/#/builds//2"
+              "some/crazy/url/#/builds/-1/2"
               "some/crazy/url/#/builds/3/1-2"
               "some/crazy/url/#/builds/3/2-2"
+              "some/crazy/url/#/builds/-1/3-2"
               "some/other/url/#/builds/8/1"
-              "some/other/url/#/builds//2"
+              "some/other/url/#/builds/-1/2"
               "some/other/url/#/builds/3/1-2"
-              "some/other/url/#/builds/3/2-2"]
+              "some/other/url/#/builds/3/2-2"
+              "some/other/url/#/builds/-1/3-2"]
              (map :web-url projects)))))
   (testing "That it produces a valid cctray-xml with explicit enabled prefix"
     (let [xmlstring (cctray-xml-for (mock-pipeline some-state {:name   "some-crazy-pipeline"
@@ -127,7 +143,8 @@
       (is (= ["some-crazy-pipeline :: some-name"
               "some-crazy-pipeline :: either"
               "some-crazy-pipeline :: some-other-name"
-              "some-crazy-pipeline :: some-other-other-name"]
+              "some-crazy-pipeline :: some-other-other-name"
+              "some-crazy-pipeline :: some-step-without-history"]
              names))))
   (testing "That it produces a valid cctray-xml with disabled prefix"
     (let [xmlstring (cctray-xml-for (mock-pipeline some-state {:name   "some-crazy-pipeline"
@@ -138,7 +155,8 @@
       (is (= ["some-name"
               "either"
               "some-other-name"
-              "some-other-other-name"]
+              "some-other-other-name"
+              "some-step-without-history"]
              names))))
   (testing "That a missing ui-url configuration does not break everything"
     (let [xmlstring (cctray-xml-for [(mock-pipeline some-state {:name   "some-crazy-pipeline"
@@ -148,11 +166,13 @@
           xmlstream (io/input-stream (.getBytes xmlstring))
           projects (parser/get-projects xmlstream)]
       (is (= ["/#/builds/8/1"
-              "/#/builds//2"
+              "/#/builds/-1/2"
               "/#/builds/3/1-2"
               "/#/builds/3/2-2"
+              "/#/builds/-1/3-2"
               "/#/builds/8/1"
-              "/#/builds//2"
+              "/#/builds/-1/2"
               "/#/builds/3/1-2"
-              "/#/builds/3/2-2"]
+              "/#/builds/3/2-2"
+              "/#/builds/-1/3-2"]
              (map :web-url projects))))))
