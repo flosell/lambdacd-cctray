@@ -6,7 +6,7 @@
   :deploy-repositories [["clojars" {:creds :gpg}]
                         ["releases" :clojars]]
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [lambdacd "0.11.0"]
+                 [lambdacd "0.13.5"]
                  [clj-time "0.9.0"]
                  [org.clojure/data.xml "0.0.8"]]
   :profiles {:dev {:dependencies [[clj-cctray "0.10.0"]

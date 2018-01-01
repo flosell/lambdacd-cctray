@@ -47,10 +47,17 @@
 (defn mock-state-component [state]
   (->MockStateComponent state))
 
+(defn- started-steps-in-state [state]
+  (set (for [build-number (keys state)
+             step-id      (keys (get state build-number))]
+         {:step-id      step-id
+          :build-number build-number})))
+
 (defn mock-pipeline [state config]
   {:pipeline-def pipeline-def
    :context      {:pipeline-state-component (mock-state-component state)
-                  :config config}})
+                  :config config
+                  :started-steps (atom (started-steps-in-state state))}})
 
 (deftest cc-xmltray-for-test
   (testing "That it produces a valid cctray-xml w/o name and ui-url"
