@@ -5,7 +5,7 @@
             [lambdacd.steps.manualtrigger :as manualtrigger]
             [lambdacd.core :as lambdacd]
             [ring.server.standalone :as ring-server]
-            [lambdacd.ui.ui-server :as ui]
+            [lambdacd.ui.core :as ui]
             [lambdacd.runners :as runners]
             [lambdacd-cctray.core :as cctray]
             [ring.util.response :as resp])
