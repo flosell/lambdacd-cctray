@@ -6,7 +6,7 @@
                               (System/getenv "CLOJURE_VERSION")
                               "1.7.0"))
 
-(defproject lambdacd-cctray "0.5.0"
+(defproject lambdacd-cctray "0.5.1-SNAPSHOT"
   :description "cctray support for lambdacd"
   :url "http://github.com/flosell/lambdacd-cctray"
   :license {:name "Apache License, version 2.0"
